@@ -1,49 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="@color/colorGray">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/deviceicon"
-        android:layout_width="57dp"
-        android:layout_height="57dp"
-        android:background="@drawable/ic_phone_android_black_24dp"/>
-
-    <TextView
-        android:id="@+id/devicename"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/relativelayouthead"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/deviceicon"
-        android:layout_marginLeft="16dp"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:text="dsa"/>
+        android:padding="16dp"
+        android:background="@color/colorWhite">
 
-    <TextView
-        android:id="@+id/primaryDevice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/deviceicon"
-        android:layout_below="@+id/devicename"
-        android:layout_marginLeft="16dp"
-        android:text="dsa"/>
+        <ImageView
+            android:id="@+id/deviceicon"
+            android:layout_width="57dp"
+            android:layout_height="57dp"
+            android:background="@drawable/ic_phone_android_black_24dp"/>
 
-    <TextView
-        android:layout_below="@+id/primaryDevice"
-        android:layout_toRightOf="@+id/deviceicon"
-        android:id="@+id/devicetype"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:text="dsa"/>
+        <TextView
+            android:id="@+id/devicename"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/deviceicon"
+            android:layout_marginLeft="16dp"
+            android:textStyle="bold"
+            android:textSize="18sp"/>
 
-    <TextView
-        android:id="@+id/devicestatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"/>
+        <TextView
+            android:id="@+id/devicetype"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/deviceicon"
+            android:layout_below="@+id/devicename"
+            android:layout_marginLeft="16dp"/>
+
+    </RelativeLayout>
+
 
 </RelativeLayout>

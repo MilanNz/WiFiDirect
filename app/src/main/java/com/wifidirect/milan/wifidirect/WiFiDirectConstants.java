@@ -5,6 +5,7 @@ package com.wifidirect.milan.wifidirect;
  */
 public class WiFiDirectConstants {
     public static final String BROADCAST_ORDER = "com.wifidirect.milan.broadcast_order";
+    public static final String BROADCAST_EXTRA_GET_ORDER = "com.wifidirect.milan.broadcast_extra_get_order";
 
     public static final String BROADCAST_ACTION_PEERS_LIST = "com.wifidirect.milan.broadcast_action_peers_list";
     public static final String BROADCAST_ACTION_CONNECTION_CHANGED = "com.wifidirect.milan.broadcast_action_connection_changed";

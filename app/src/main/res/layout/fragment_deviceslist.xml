@@ -9,7 +9,8 @@
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true">
+        android:layout_centerVertical="true"
+        android:visibility="gone">
         <ImageView
             android:id="@+id/iconempty"
             android:layout_width="67dp"
@@ -26,9 +27,8 @@
             android:layout_marginTop="8dp"/>
     </RelativeLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:scrollbars="vertical"
+    <ListView
+        android:id="@+id/listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

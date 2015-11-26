@@ -7,4 +7,6 @@
     <color name="colorPurple800">#6A1B9A</color>
     <color name="colorPurple700">#8E24AA</color>
     <color name="colorGray">#f9f9f9</color>
+
+    <color name="colorWhite">#fff</color>
 </resources>

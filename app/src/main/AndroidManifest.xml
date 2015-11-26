@@ -2,13 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wifidirect.milan.wifidirect" >
 
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
-
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- permissions -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" android:required="true"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" android:required="true"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" android:required="true"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" android:required="true"/>
+    <uses-permission android:name="android.permission.INTERNET" android:required="true"/>
 
     <application
         android:allowBackup="true"
@@ -17,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
@@ -26,6 +25,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".services.WifiDirectService"/>
     </application>
 
 </manifest>
