@@ -8,6 +8,4 @@ Wi-Fi peer-to-peer (P2P) allows Android 4.0 (API level 14) or later devices with
 * [Creating P2P Connections with Wi-Fi](http://developer.android.com/training/connect-devices-wirelessly/wifi-direct.html)
 * [WifiP2pManager](http://developer.android.com/reference/android/net/wifi/p2p/WifiP2pManager.html)
 
-* Detect devices
-* Connect
 
