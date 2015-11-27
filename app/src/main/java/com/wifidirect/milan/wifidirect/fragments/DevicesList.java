@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,6 +52,7 @@ public class DevicesList extends Fragment{
     @Bind(R.id.listview) ListView mListView;
     @Bind(R.id.emptyrelative) RelativeLayout mRelativeLayoutEmpty;
     @Bind(R.id.fab) FloatingActionButton mFloatingActionButton;
+    @Bind(R.id.progressbar) ProgressBar mProgressbar;
     private boolean isWiFiEnable;
     private DeviceAdapter mAdapter;
     private List<WifiP2pDevice> mDevicesList = new ArrayList<>();
@@ -64,7 +66,9 @@ public class DevicesList extends Fragment{
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container
+            , Bundle savedInstanceState) {
+        // inflate fragment
         View view = inflater.inflate(R.layout.fragment_deviceslist, null);
         // action bar
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
@@ -105,6 +109,10 @@ public class DevicesList extends Fragment{
         public void onClick(View v) {
             Snackbar.make(v, "Searching", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
+
+            if(MainActivity.mService != null) {
+                MainActivity.mService.refreshList();
+            }
         }
     }
 
@@ -112,9 +120,6 @@ public class DevicesList extends Fragment{
 
     @Subscribe
     public void answerAvailable(Events.WifiState event) {
-        // TODO: React to the event somehow!
-        Toast.makeText(getActivity(), event.state, Toast.LENGTH_SHORT).show();
-
         if(MainActivity.mService == null) {
             return;
         }
@@ -122,12 +127,8 @@ public class DevicesList extends Fragment{
         switch (event.state){
             case WiFiDirectConstants.BROADCAST_ACTION_PEERS_LIST:
 
-                if(mDevicesList == null) {
-                    mDevicesList = MainActivity.mService.mDevicesList;
-                } else {
-                    mDevicesList.clear();
-                    mDevicesList.addAll(MainActivity.mService.mDevicesList);
-                }
+                mDevicesList.clear();
+                mDevicesList.addAll(MainActivity.mService.mDevicesList);
 
                 if(mDevicesList.size() > 0) {
                     mRelativeLayoutEmpty.setVisibility(View.GONE);
@@ -139,6 +140,9 @@ public class DevicesList extends Fragment{
                 mAdapter.clear();
                 mAdapter.addAll(mDevicesList);
                 mAdapter.notifyDataSetChanged();
+
+                Snackbar.make(getView(), "New list of Ppeers", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
 
                 break;
 
@@ -159,9 +163,18 @@ public class DevicesList extends Fragment{
                 Snackbar.make(getView(), "CONNECTED, you are Client!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 break;
+
             case WiFiDirectConstants.BROADCAST_ACTION_INFO_GROUP_FORMED_OWNER:
                 Snackbar.make(getView(), "CONNECTED, you are OWNER!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                break;
+
+            case WiFiDirectConstants.BROADCAST_ACTION_DISCOVERY_STARTED:
+                mProgressbar.setVisibility(View.VISIBLE);
+                break;
+
+            case WiFiDirectConstants.BROADCAST_ACTION_DISCOVERY_STOPPED:
+                mProgressbar.setVisibility(View.GONE);
                 break;
         }
 
@@ -199,7 +212,9 @@ public class DevicesList extends Fragment{
     private void dialogOptions(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Options");
-        builder.setItems(new String[]{"More Informations", "Connect", "Send file", "Send message"}
+        builder.setItems(
+                (true)? new String[]{"More Informations", "Disconnect", "Send file", "Send message"}
+                        : new String[]{"More Informations", "Connect", "Send file", "Send message"}
                 , new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -217,12 +232,11 @@ public class DevicesList extends Fragment{
                     replaceFragment(new ChatDirect(), mDevicesList.get(position).deviceName
                             , mDevicesList.get(position).deviceAddress);*/
 
-                    MainActivity.mService.conncetToDevice(mDevicesList.get(position));
-
+                    MainActivity.mService.connectToDevice(mDevicesList.get(position));
 
                     // send file
                 } else if (which == 2) {
-
+                    MainActivity.mService.sendMessage();
                     // send message
                 } else if (which == 3) {
 

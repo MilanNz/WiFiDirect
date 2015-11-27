@@ -16,7 +16,6 @@ public class ChatServerAsyncTask extends AsyncTask {
     private Context mContext;
     private static String TAG = "ChatServerTask";
 
-
     public ChatServerAsyncTask(Context context){
         this.mContext = context;
     }
@@ -26,17 +25,25 @@ public class ChatServerAsyncTask extends AsyncTask {
         try {
             // Create a server socket and wait for client connections. This call blocks until a
             // connection is accepted from a client
+
+            Log.e("ChatServerAsy", "doinBackground");
             ServerSocket serverSocket = new ServerSocket(8888);
-            serverSocket.setReuseAddress(true);
-            Socket socket = serverSocket.accept();
 
-            // client is connected and transferred data.
-            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-            Object object = objectInputStream.readObject();
+            while(true) {
+                serverSocket.setReuseAddress(true);
+                Socket socket = serverSocket.accept();
 
-            if(object.getClass().equals(String.class) && ((String)object).equals("DIRECT")) {
-                Log.e(TAG, "Client address: " + socket.getInetAddress());
+                Log.e("ChatClientAsy", "doinBackground");
+
+                // client is connected and transferred data.
+                ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+                Object object = objectInputStream.readObject();
+                Log.e("ChatServerAsy", "doinBackground");
+                if (object.getClass().equals(String.class) && ((String) object).equals("DIRECT")) {
+                    Log.e(TAG, "Client address: " + socket.getInetAddress());
+                }
             }
+
         } catch (IOException e) {
 
         } catch (ClassNotFoundException e) {

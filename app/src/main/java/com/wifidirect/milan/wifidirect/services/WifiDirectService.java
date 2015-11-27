@@ -27,6 +27,7 @@ import com.wifidirect.milan.wifidirect.connections.ChatServerAsyncTask;
 import com.wifidirect.milan.wifidirect.connections.WifiClient;
 import com.wifidirect.milan.wifidirect.connections.WifiServer;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
     private WifiP2PReciver mReciver;
     public WifiP2pManager mManager;
     public WifiP2pManager.Channel mChannel;
+    public InetAddress mAddress;
 
     @Override
     public void onCreate() {
@@ -53,13 +55,14 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
 
         // wifi manager
         mManager = (WifiP2pManager)getSystemService(Context.WIFI_P2P_SERVICE);
+
         // channel
         mChannel = mManager.initialize(getApplicationContext(), Looper.getMainLooper(), null);
+
         // register reciver
         mReciver = new WifiP2PReciver(mManager, mChannel, this, this);
 
         mDevicesList = new ArrayList<>();
-
     }
 
 
@@ -118,19 +121,16 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
 
     @Override
     public void onSuccess() {
-        Log.e(TAG, "Success");
-        // descovering peers
-        /*
-        if(manager != null){
-            manager.discoverPeers(channel, this);
-        }*/
+        Log.d(TAG, "Success");
     }
 
 
     @Override
     public void onFailure(int reason) {
-        Log.e(TAG,"Failure" + String.valueOf(reason));
-
+        Log.e(TAG, "Failure" + String.valueOf(reason));
+        // 0 - Indicates that the operation failed due to an internal error.
+        // 1 - Indicates that the operation failed because p2p is unsupported on the device.
+        // 2 - Indicates that the operation failed because the framework is busy and unable to service the request
     }
 
 
@@ -140,63 +140,58 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
     }
 
 
+    /** Refresh peers list. */
     public void refreshList() {
         mManager.discoverPeers(mChannel, this);
+    }
+
+
+    public void sendMessage() {
+        // new ChatServerAsyncTask(getApplicationContext()).execute();
+        new ChatClientAsyncTask(getApplicationContext(), mAddress.getHostAddress()).execute();
+        Log.e(TAG, mAddress.getHostAddress());
     }
 
 
     @Override
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
         // InetAddress from WifiP2pInfo struct.
-        //InetAddress groupOwnerAddress = info.groupOwnerAddress.getHostAddress();
-
+        Log.e(TAG, "ConnectionInfoAvailable");
+        mAddress = info.groupOwnerAddress;
         if(info.groupFormed && info.isGroupOwner) {
             // Do whatever tasks are specific to the group owner.
             // One common case is creating a server thread and accepting
             // incoming connections.
+            Log.e(TAG, "GroupFormed, isGroupeOwner");
             sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_INFO_GROUP_FORMED_OWNER, null);
 
             new ChatServerAsyncTask(getApplicationContext()).execute();
-            // WifiServer wifiServer = new WifiServer();
-            // wifiServer.setPort(8888).startServer();
         } else if(info.groupFormed) {
             // The other device acts as the client. In this case,
             // you'll want to create a client thread that connects to the group
             // owner.
+            Log.e(TAG, "Only groupFormed");
             sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_INFO_GROUP_FORMED_CLIENT, null);
-            // WifiClient wifiClient = new WifiClient();
-            // wifiClient.setPort(8888).setAddress(info.groupOwnerAddress.toString());
-            // wifiClient.startClient();
-            // wifiClient.request();
             new ChatClientAsyncTask(getApplicationContext(), info.groupOwnerAddress.toString()).execute();
         }
 
     }
 
-    public void conncetToDevice(WifiP2pDevice device){
+
+    /** Esablish connection with another device.
+     * @param device WifiP2pDevice. */
+    public void connectToDevice(WifiP2pDevice device){
         WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = device.deviceAddress;
-        //onfig.wps.setup = WpsInfo.PBC;
-
-        /*
-        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-
-                Log.e(TAG, "Success");
-            }
-
-            @Override
-            public void onFailure(int reason) {
-                Log.e(TAG,"Failure" + String.valueOf(reason));
-            }
-            // 0 - Indicates that the operation failed due to an internal error.
-            // 1 - Indicates that the operation failed because p2p is unsupported on the device.
-            // 2 - Indicates that the operation failed because the framework is busy and unable to service the request
-
-        });*/
+        config.wps.setup = WpsInfo.PBC;
 
         mManager.connect(mChannel, config, this);
+    }
+
+
+    /** Remove conncetion. */
+    public void removeFromDevice() {
+        mManager.removeGroup(mChannel, this);
     }
 
 
@@ -235,7 +230,7 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
 
             if(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
                 // Broadcast intent action to indicate whether Wi-Fi p2p is enabled or disabled.
-                Log.d(TAG, "STATE CHANGED");
+                Log.e(TAG, "STATE CHANGED");
                 int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
 
                 if(state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
@@ -249,7 +244,7 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
             } else if(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
                 // Broadcast intent action indicating that the state of Wi-Fi p2p connectivity has changed.
                 //sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_CONNECTION_CHANGED);
-                Log.d(TAG, "P2P CONNECTION CHANGED");
+                Log.e(TAG, "P2P CONNECTION CHANGED");
                 NetworkInfo networkInfo = (NetworkInfo) intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
 
                 if(networkInfo.isConnected()) {
@@ -262,7 +257,7 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
 
             } else if(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
                 // Broadcast intent action indicating that the available peer list has changed.
-                Log.d(TAG, "P2P PEERS CHANGED");
+                Log.e(TAG, "P2P PEERS CHANGED");
                 sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_PEERS_LIST, null);
                 if(manager != null){
                     manager.requestPeers(channel, peerListListener);
@@ -290,6 +285,8 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
 
         }
     }
+
+
 
 
 

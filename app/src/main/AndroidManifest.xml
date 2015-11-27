@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" android:required="true"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" android:required="true"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" android:required="true"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.INTERNET" android:required="true"/>
 
     <application

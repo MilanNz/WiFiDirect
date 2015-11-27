@@ -2,6 +2,7 @@ package com.wifidirect.milan.wifidirect.connections;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -27,15 +28,18 @@ public class ChatClientAsyncTask extends AsyncTask {
     protected Object doInBackground(Object[] params) {
         try {
             // create client socket with the host, port and timeout information.
+
+            Log.e("ChatClientAsy", "doinBackground");
             Socket socket = new Socket();
             socket.setReuseAddress(true);
             socket.connect((new InetSocketAddress(host, 8888)), 500);
 
+            Log.e("ChatClientAsy", "doinBackground");
             // create a byte stream
             OutputStream outputStream = socket.getOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
             objectOutputStream.writeBytes(new String("DIRECT"));
-
+            Log.e("ChatClientAsy", "doinBackground");
             objectOutputStream.close();
             outputStream.close();
             socket.close();
