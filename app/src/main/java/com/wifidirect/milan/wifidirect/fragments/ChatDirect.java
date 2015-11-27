@@ -43,8 +43,8 @@ public class ChatDirect extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, null);
 
-        String name = getArguments().getString("devicename");
-        Toast.makeText(getActivity(), String.valueOf(name), Toast.LENGTH_SHORT).show();
+        String name = getArguments().getString("name");
+        String address = getArguments().getString("address");
         // action bar
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

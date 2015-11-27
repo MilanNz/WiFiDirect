@@ -3,16 +3,24 @@ package com.wifidirect.milan.wifidirect.fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -60,6 +68,7 @@ public class DevicesList extends Fragment{
         View view = inflater.inflate(R.layout.fragment_deviceslist, null);
         // action bar
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle("");
 
         // ButterKnife lib
         ButterKnife.bind(this, view);
@@ -112,18 +121,24 @@ public class DevicesList extends Fragment{
 
         switch (event.state){
             case WiFiDirectConstants.BROADCAST_ACTION_PEERS_LIST:
-                mDevicesList = MainActivity.mService.devicesList;
 
-                if(mDevicesList.size() > 0){
+                if(mDevicesList == null) {
+                    mDevicesList = MainActivity.mService.mDevicesList;
+                } else {
+                    mDevicesList.clear();
+                    mDevicesList.addAll(MainActivity.mService.mDevicesList);
+                }
+
+                if(mDevicesList.size() > 0) {
                     mRelativeLayoutEmpty.setVisibility(View.GONE);
                 } else {
                     mRelativeLayoutEmpty.setVisibility(View.VISIBLE);
                 }
 
-                // refresh devices list
-                mAdapter.refreshList(mDevicesList);
+                // refresh adapter
+                mAdapter.clear();
+                mAdapter.addAll(mDevicesList);
                 mAdapter.notifyDataSetChanged();
-
 
                 break;
 
@@ -134,9 +149,20 @@ public class DevicesList extends Fragment{
             case WiFiDirectConstants.BROADCAST_ACTION_WIFI_DISABLE:
                 isWiFiEnable = false;
                 dialog();
-
                 break;
 
+            case WiFiDirectConstants.BROADCAST_ACTION_IS_CONNECTED:
+                Toast.makeText(getActivity(), "CONNECTED", Toast.LENGTH_SHORT);
+                break;
+
+            case WiFiDirectConstants.BROADCAST_ACTION_INFO_GROUP_FORMED_CLIENT:
+                Snackbar.make(getView(), "CONNECTED, you are Client!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                break;
+            case WiFiDirectConstants.BROADCAST_ACTION_INFO_GROUP_FORMED_OWNER:
+                Snackbar.make(getView(), "CONNECTED, you are OWNER!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                break;
         }
 
 
@@ -152,7 +178,8 @@ public class DevicesList extends Fragment{
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // enable wifi
-                WifiManager wifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+                WifiManager wifiManager = (WifiManager) getActivity()
+                        .getSystemService(Context.WIFI_SERVICE);
                 wifiManager.setWifiEnabled(true);
             }
         });
@@ -172,22 +199,35 @@ public class DevicesList extends Fragment{
     private void dialogOptions(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Options");
-        builder.setItems(new String[]{"More Informations" ,"Send message", "Send file"}, new DialogInterface.OnClickListener() {
+        builder.setItems(new String[]{"More Informations", "Connect", "Send file", "Send message"}
+                , new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(which == 0) {
-                    Log.e(TAG, "list position " + String.valueOf(position));
-                    Log.e(TAG, "list size " + String.valueOf(mDevicesList.size()));
+                // info
+                if (which == 0) {
                     try {
                         dialogInfo(mDevicesList.get(position));
-                    }catch (ArrayIndexOutOfBoundsException e){
+                    } catch (ArrayIndexOutOfBoundsException e) {
                         Log.e(TAG, e.getMessage());
                     }
-                } else if(which == 1) {
 
-                } else if(which == 2) {
+                    // connect
+                } else if (which == 1) {
+                    /*
+                    replaceFragment(new ChatDirect(), mDevicesList.get(position).deviceName
+                            , mDevicesList.get(position).deviceAddress);*/
+
+                    MainActivity.mService.conncetToDevice(mDevicesList.get(position));
+
+
+                    // send file
+                } else if (which == 2) {
+
+                    // send message
+                } else if (which == 3) {
 
                 }
+
             }
         });
         builder.create();
@@ -201,11 +241,16 @@ public class DevicesList extends Fragment{
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View dialogv = LayoutInflater.from(getActivity()).inflate(R.layout.dialog, null);
 
-        ((TextView)dialogv.findViewById(R.id.deviceName)).setText(String.valueOf(device.deviceName));
-        ((TextView)dialogv.findViewById(R.id.devicemacaddress)).setText(String.valueOf(device.deviceAddress));
-        ((TextView)dialogv.findViewById(R.id.deviceprimarydevicetype)).setText(String.valueOf(device.primaryDeviceType));
-        ((TextView)dialogv.findViewById(R.id.devicesecondarydevicetype)).setText(String.valueOf(device.secondaryDeviceType));
-        ((TextView)dialogv.findViewById(R.id.devicestatuse)).setText(String.valueOf(device.status));
+        ((TextView)dialogv.findViewById(R.id.deviceName))
+                .setText(String.valueOf(device.deviceName));
+        ((TextView)dialogv.findViewById(R.id.devicemacaddress))
+                .setText(String.valueOf(device.deviceAddress));
+        ((TextView)dialogv.findViewById(R.id.deviceprimarydevicetype))
+                .setText(String.valueOf(device.primaryDeviceType));
+        ((TextView)dialogv.findViewById(R.id.devicesecondarydevicetype))
+                .setText(String.valueOf(device.secondaryDeviceType));
+        ((TextView)dialogv.findViewById(R.id.devicestatuse))
+                .setText(String.valueOf(device.status));
 
         builder.setView(dialogv);
         builder.setTitle("Info");
@@ -229,6 +274,39 @@ public class DevicesList extends Fragment{
     public void onPause() {
         super.onPause();
     }
+
+
+    /** Replace fragment with existing. */
+    private void replaceFragment(Fragment fragment, String name, String address){
+        Bundle bundle = new Bundle();
+        bundle.putString("name", name);
+        bundle.putString("address", address);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragment.setArguments(bundle);
+        fragmentTransaction.replace(R.id.container, fragment).addToBackStack("chat.fragment");
+        fragmentTransaction.commit();
+    }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.menu_list, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(item.getItemId() == R.id.refresh) {
+            if(MainActivity.mService != null) {
+                MainActivity.mService.refreshList();
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     @Override
     public void onDestroyView() {
