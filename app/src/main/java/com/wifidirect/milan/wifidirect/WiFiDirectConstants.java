@@ -20,4 +20,6 @@ public class WiFiDirectConstants {
     public static final String BROADCAST_ACTION_INFO_GROUP_FORMED_CLIENT = "com.wifidirect.milan.broadcast_action_info_group_formed_client";
     public static final String BROADCAST_ACTION_INFO_GROUP_FORMED_OWNER = "com.wifidirect.milan.broadcast_action_info_group_formed_owner";
     public static final String BROADCAST_ACTION_IS_CONNECTED = "com.wifidirect.milan.broadcast_action_is_connected";
+
+    public static final String BROADCAST_ACTION_DEVICES_CONNECTED = "com.wifidirect.milan.action.devices_connected";
 }

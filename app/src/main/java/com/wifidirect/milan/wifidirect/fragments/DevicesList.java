@@ -37,6 +37,8 @@ import com.wifidirect.milan.wifidirect.WiFiDirectConstants;
 import com.wifidirect.milan.wifidirect.WifiDirectApplication;
 import com.wifidirect.milan.wifidirect.activities.MainActivity;
 import com.wifidirect.milan.wifidirect.adapters.DeviceAdapter;
+import com.wifidirect.milan.wifidirect.listeners.MessageListener;
+import com.wifidirect.milan.wifidirect.notifications.WifiNotification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +49,7 @@ import butterknife.ButterKnife;
 /**
  * Created by milan on 25.11.15..
  */
-public class DevicesList extends Fragment{
+public class DevicesList extends Fragment implements MessageListener{
     private static final String TAG = "DeviceList";
     @Bind(R.id.listview) ListView mListView;
     @Bind(R.id.emptyrelative) RelativeLayout mRelativeLayoutEmpty;
@@ -90,7 +92,25 @@ public class DevicesList extends Fragment{
         // set listview item click listener
         mListView.setOnItemClickListener(new ListViewOnClickItem());
 
+        // add listener
+        if(MainActivity.mService != null) {
+            MainActivity.mService.addListener(this);
+        }
+
         return view;
+    }
+
+
+
+    @Override
+    public void onMessageReceived(String response) {
+        // create notification
+        WifiNotification.createNotification(getActivity(), response);
+    }
+
+    @Override
+    public void onConnected(boolean isConnected) {
+        Toast.makeText(getActivity(), "CONNECTED!", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -125,11 +145,13 @@ public class DevicesList extends Fragment{
         }
 
         switch (event.state){
+            // new list of peers
             case WiFiDirectConstants.BROADCAST_ACTION_PEERS_LIST:
-
+                // clear list of devices and add new list
                 mDevicesList.clear();
                 mDevicesList.addAll(MainActivity.mService.mDevicesList);
 
+                // show or hide RelativeLayout
                 if(mDevicesList.size() > 0) {
                     mRelativeLayoutEmpty.setVisibility(View.GONE);
                 } else {
@@ -141,15 +163,17 @@ public class DevicesList extends Fragment{
                 mAdapter.addAll(mDevicesList);
                 mAdapter.notifyDataSetChanged();
 
-                Snackbar.make(getView(), "New list of Ppeers", Snackbar.LENGTH_LONG)
+                Snackbar.make(getView(), "New devices", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
                 break;
 
+            // Wifi enable
             case WiFiDirectConstants.BROADCAST_ACTION_WIFI_ENABLE:
                 isWiFiEnable = true;
                 break;
 
+            // Wifi disable
             case WiFiDirectConstants.BROADCAST_ACTION_WIFI_DISABLE:
                 isWiFiEnable = false;
                 dialog();
@@ -175,6 +199,9 @@ public class DevicesList extends Fragment{
 
             case WiFiDirectConstants.BROADCAST_ACTION_DISCOVERY_STOPPED:
                 mProgressbar.setVisibility(View.GONE);
+                break;
+
+            default:
                 break;
         }
 
@@ -212,9 +239,7 @@ public class DevicesList extends Fragment{
     private void dialogOptions(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Options");
-        builder.setItems(
-                (true)? new String[]{"More Informations", "Disconnect", "Send file", "Send message"}
-                        : new String[]{"More Informations", "Connect", "Send file", "Send message"}
+        builder.setItems(new String[]{"More Informations", "Connect", "Send message"}
                 , new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -228,18 +253,13 @@ public class DevicesList extends Fragment{
 
                     // connect
                 } else if (which == 1) {
-                    /*
-                    replaceFragment(new ChatDirect(), mDevicesList.get(position).deviceName
-                            , mDevicesList.get(position).deviceAddress);*/
 
                     MainActivity.mService.connectToDevice(mDevicesList.get(position));
 
-                    // send file
-                } else if (which == 2) {
-                    MainActivity.mService.sendMessage();
                     // send message
-                } else if (which == 3) {
-
+                } else if (which == 2) {
+                    replaceFragment(new ChatDirect(), mDevicesList.get(position).deviceName
+                            , mDevicesList.get(position).deviceAddress);
                 }
 
             }
