@@ -168,9 +168,9 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
     @Override
     public void onReceiver(String s) {
         Log.e(TAG, s);
-        if (s.equals("")) {
+        /*if (s.equals("receive")) {
             mListener.onConnected(true);
-        }
+        }*/
 
         mListener.onMessageReceived(s);
         WifiNotification.createNotification(getApplicationContext(), s);

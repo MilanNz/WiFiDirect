@@ -94,6 +94,7 @@ public class SocketTransfer implements Transfer {
                 mDataOutputStream = new DataOutputStream(mSocket.getOutputStream());
                 mDataInputStream = new DataInputStream(mSocket.getInputStream());
 
+                // sendMessage("receive");
                 // reciver
                 while(mSocket.isConnected()){
                     Log.e(TAG, "Receive!");
@@ -136,6 +137,7 @@ public class SocketTransfer implements Transfer {
                 mDataOutputStream = new DataOutputStream(mSocket.getOutputStream());
                 mDataInputStream = new DataInputStream(mSocket.getInputStream());
 
+                // sendMessage("receive");
                 // reciver
                 while(mSocket.isConnected()){
                     Log.e(TAG, "Receive!");
