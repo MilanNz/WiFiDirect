@@ -9,13 +9,23 @@
         android:id="@+id/relativemessagebody"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/colorGray"
+        android:background="@color/colorPrimary"
         android:padding="16dp">
         <TextView
             android:id="@+id/textviewmessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hello!"
+            android:textColor="@color/colorWhite"/>
+
+        <TextView
+            android:id="@+id/textviewtime"
+            android:layout_below="@+id/textviewmessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="01:44"
+            android:textSize="9sp"
+            android:layout_marginTop="2dp"
             android:textColor="@color/colorWhite"/>
     </RelativeLayout>
 

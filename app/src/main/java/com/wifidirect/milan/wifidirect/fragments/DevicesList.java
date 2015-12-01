@@ -105,7 +105,7 @@ public class DevicesList extends Fragment implements MessageListener{
     @Override
     public void onMessageReceived(String response) {
         // create notification
-        WifiNotification.createNotification(getActivity(), response);
+        // WifiNotification.createNotification(getActivity(), response);
     }
 
     @Override
