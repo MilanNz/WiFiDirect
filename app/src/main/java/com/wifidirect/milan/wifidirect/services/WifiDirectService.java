@@ -57,6 +57,7 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
         super.onCreate();
 
         intentFilter = new IntentFilter();
+        // inicialize intent filter
         initIntentFilter();
 
         // wifi manager
@@ -70,6 +71,7 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
 
         // socket
         mTransfer = new SocketTransfer();
+
         // add listener
         mTransfer.addListener(this);
         mTransfer.addListener(this);
@@ -146,7 +148,8 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
         Log.e(TAG, "Failure" + String.valueOf(reason));
         // 0 - Indicates that the operation failed due to an internal error.
         // 1 - Indicates that the operation failed because p2p is unsupported on the device.
-        // 2 - Indicates that the operation failed because the framework is busy and unable to service the request
+        // 2 - Indicates that the operation failed because the framework is busy and unable
+        // to service the request
     }
 
 
@@ -190,7 +193,8 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
             // send message to client
             mTransfer.sendMessage("Hello from server!!!");
 
-            sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_INFO_GROUP_FORMED_OWNER, null);
+            sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_INFO_GROUP_FORMED_OWNER
+                    , null);
 
         } else if (info.groupFormed) {
             // The other device acts as the client. In this case,
@@ -199,7 +203,8 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
             Log.e(TAG, "GroupFormed");
 
             // set port, address and start client
-            mTransfer.setPort(PORT).setAddress(info.groupOwnerAddress.getHostAddress()).startClient();
+            mTransfer.setPort(PORT).setAddress(info.groupOwnerAddress.getHostAddress())
+                    .startClient();
             // send message to server
             mTransfer.sendMessage("Hello from client!");
         }
@@ -273,20 +278,25 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
 
                 // is wifi enabled
                 if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
-                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_WIFI_ENABLE, null);
+                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_WIFI_ENABLE
+                            , null);
                 } else {
-                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_WIFI_DISABLE, null);
+                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_WIFI_DISABLE
+                            , null);
                 }
 
             } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
-                // Broadcast intent action indicating that the state of Wi-Fi p2p connectivity has changed.
+                // Broadcast intent action indicating that the state of Wi-Fi p2p connectivity
+                // has changed.
                 Log.e(TAG, "P2P CONNECTION CHANGED");
-                NetworkInfo networkInfo = (NetworkInfo) intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+                NetworkInfo networkInfo = (NetworkInfo) intent.getParcelableExtra(
+                        WifiP2pManager.EXTRA_NETWORK_INFO);
 
                 if(networkInfo.isConnected()) {
                     // We are connected with the other device, request connection
                     // info to find group owner IP
-                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_IS_CONNECTED, networkInfo.getExtraInfo());
+                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_IS_CONNECTED
+                            , networkInfo.getExtraInfo());
                     manager.requestConnectionInfo(channel, connectionInfoListener);
                 }
 
@@ -305,15 +315,18 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
 
 
             } else if (WifiP2pManager.WIFI_P2P_DISCOVERY_CHANGED_ACTION.equals(action)) {
-                // Broadcast intent action indicating that peer discovery has either started or stopped.
+                // Broadcast intent action indicating that peer discovery has either started
+                // or stopped.
                 int state = intent.getIntExtra(WifiP2pManager.EXTRA_DISCOVERY_STATE, -1);
 
                 if (state == WifiP2pManager.WIFI_P2P_DISCOVERY_STARTED) {
                     // started
-                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_DISCOVERY_STARTED, null);
+                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_DISCOVERY_STARTED
+                            , null);
                 } else {
                     // stopped
-                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_DISCOVERY_STOPPED, null);
+                    sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_DISCOVERY_STOPPED
+                            , null);
                 }
 
             }

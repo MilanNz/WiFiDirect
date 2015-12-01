@@ -138,7 +138,6 @@ public class ChatDirect extends Fragment implements MessageListener {
                 break;
         }
 
-
     }
 
 
