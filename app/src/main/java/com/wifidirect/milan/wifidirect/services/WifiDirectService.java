@@ -19,6 +19,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.wifidirect.milan.wifidirect.Events;
+import com.wifidirect.milan.wifidirect.utils.MessageUtils;
 import com.wifidirect.milan.wifidirect.listeners.MessageListener;
 import com.wifidirect.milan.wifidirect.listeners.SocketListener;
 import com.wifidirect.milan.wifidirect.connections.SocketTransfer;
@@ -70,7 +71,7 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
         mReciver = new WifiP2PReciver(mManager, mChannel, this, this);
 
         // socket
-        mTransfer = new SocketTransfer();
+        mTransfer = new SocketTransfer(getApplicationContext());
 
         // add listener
         mTransfer.addListener(this);
@@ -168,13 +169,11 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
     @Override
     public void onReceiver(String s) {
         Log.e(TAG, s);
-        /*if (s.equals("receive")) {
-            mListener.onConnected(true);
-        }*/
+
         if (mListener != null) {
             mListener.onMessageReceived(s);
         }
-        WifiNotification.createNotification(getApplicationContext(), s);
+        WifiNotification.createNotification(getApplicationContext(), MessageUtils.parseMessage(s)[3]);
     }
 
 
@@ -191,8 +190,6 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
 
             // set port and start server
             mTransfer.setPort(PORT).startServer();
-            // send message to client
-            mTransfer.sendMessage("Hello from server!!!");
 
             sendBroadcastToActivity(WiFiDirectConstants.BROADCAST_ACTION_INFO_GROUP_FORMED_OWNER
                     , null);
@@ -206,10 +203,30 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
             // set port, address and start client
             mTransfer.setPort(PORT).setAddress(info.groupOwnerAddress.getHostAddress())
                     .startClient();
-            // send message to server
-            mTransfer.sendMessage("Hello from client!");
+
         }
 
+    }
+
+
+    /** Start message receiver. */
+    public void startMessageReceiver() {
+        mTransfer.startMessageReceiver();
+    }
+
+    /** Stop message receiver. */
+    public void stopMessageReceiver() {
+        mTransfer.stopMessageReceiver();
+    }
+
+    /** Start file receiver. */
+    public void startFileReceiver() {
+        mTransfer.startFileReceiver();
+    }
+
+    /** Stop file receiver. */
+    public void stopFileReceiver() {
+        mTransfer.stopFileReceiver();
     }
 
 
@@ -220,6 +237,9 @@ public class WifiDirectService extends Service implements WifiP2pManager.Channel
     }
 
 
+    public void sendFile(String path) {
+        mTransfer.sendFile(path);
+    }
 
     /** Esablish connection with another device.
      * @param device WifiP2pDevice. */

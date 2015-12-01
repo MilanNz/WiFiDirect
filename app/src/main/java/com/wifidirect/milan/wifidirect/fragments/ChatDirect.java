@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.squareup.otto.Subscribe;
 import com.wifidirect.milan.wifidirect.Events;
+import com.wifidirect.milan.wifidirect.utils.MessageUtils;
 import com.wifidirect.milan.wifidirect.listeners.MessageListener;
 import com.wifidirect.milan.wifidirect.R;
 import com.wifidirect.milan.wifidirect.WiFiDirectConstants;
@@ -36,6 +37,7 @@ public class ChatDirect extends Fragment implements MessageListener {
     @Bind(R.id.edittextmessage) EditText mEditText;
     private ChatAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private String chatName;
 
 
     @Override
@@ -51,14 +53,15 @@ public class ChatDirect extends Fragment implements MessageListener {
         View view = inflater.inflate(R.layout.fragment_chat, null);
 
         // get name
-        String name = getArguments().getString("name");
+        chatName = getArguments().getString("name");
 
         // action bar
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Chat");
 
         // set subtitle on actionbar
-        if (name != null) {
-            ((MainActivity) getActivity()).mToolbar.setSubtitle(name);
+        if (chatName != null) {
+            ((MainActivity) getActivity()).mToolbar.setSubtitle(chatName);
         }
 
         // bind butter knife lib
@@ -78,22 +81,30 @@ public class ChatDirect extends Fragment implements MessageListener {
         // add listener
         if (MainActivity.mService != null) {
             MainActivity.mService.addListener(this);
+            MainActivity.mService.startMessageReceiver();
         }
-
-        // remove all notifications
-        // WifiNotification.removeNotification();
 
         return view;
     }
 
 
-
     @OnClick(R.id.imagebuttonsend)
     public void sendMessage() {
+        // get message from edittext
         String message = mEditText.getText().toString();
+
+        // clear edit text
         mEditText.setText("");
+
+        // add message to adapter
         mAdapter.addMessage(message, true);
-        MainActivity.mService.sendMessage(message);
+
+        // create json object
+        String messageEncode = MessageUtils.createMessage(chatName, message
+                , MessageUtils.TYPE_MESSAGE, message.length(), "text");
+
+        // send message
+        MainActivity.mService.sendMessage(messageEncode);
     }
 
 
@@ -102,17 +113,16 @@ public class ChatDirect extends Fragment implements MessageListener {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mAdapter.addMessage(response, false);
-                // mAdapter.notifyDataSetChanged();
+                String[] messageDecode = MessageUtils.parseMessage(response);
+                mAdapter.addMessage(messageDecode[3], false);
             }
         });
-
     }
 
 
     @Override
     public void onConnected(boolean isConnected) {
-        Toast.makeText(getActivity(), "Connected", Toast.LENGTH_SHORT).show();
+        // Toast.makeText(getActivity(), "Connected", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -162,8 +172,16 @@ public class ChatDirect extends Fragment implements MessageListener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        // unbind butterknife and wifidirect
         ButterKnife.unbind(this);
         WifiDirectApplication.getBus().unregister(this);
+
+        // stop message hendler
+        if(MainActivity.mService != null) {
+            MainActivity.mService.stopMessageReceiver();
+        }
+
     }
 
 

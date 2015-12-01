@@ -30,4 +30,15 @@ public interface Transfer {
     /** Set InetAddress
      * @param address InetAddress*/
     Transfer setInetAddress(InetAddress address);
+    /** Send file.
+     * @param path */
+    void sendFile(String path);
+    /** Start message receiver. */
+    void startMessageReceiver();
+    /** Start file receiver. */
+    void startFileReceiver();
+    /** Stop message receiver. */
+    void stopMessageReceiver();
+    /** Stop file receiver. */
+    void stopFileReceiver();
 }

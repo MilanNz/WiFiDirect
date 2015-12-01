@@ -75,6 +75,7 @@ public class DevicesList extends Fragment implements MessageListener{
         // action bar
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle("");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("WiFiDirect");
 
         // ButterKnife lib
         ButterKnife.bind(this, view);
@@ -96,6 +97,13 @@ public class DevicesList extends Fragment implements MessageListener{
         if(MainActivity.mService != null) {
             MainActivity.mService.addListener(this);
         }
+
+        /*
+        WifiP2pDevice device = new WifiP2pDevice();
+        device.deviceAddress = "12:23:34:45:56";
+        device.deviceName = "Nexus 6";
+
+        mDevicesList.add(device);*/
 
         return view;
     }
@@ -239,7 +247,7 @@ public class DevicesList extends Fragment implements MessageListener{
     private void dialogOptions(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Options");
-        builder.setItems(new String[]{"More Informations", "Connect", "Send message"}
+        builder.setItems(new String[]{"More Informations", "Connect", "Send message", "Send File"}
                 , new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -251,14 +259,18 @@ public class DevicesList extends Fragment implements MessageListener{
                         Log.e(TAG, e.getMessage());
                     }
 
-                    // connect
+                // connect
                 } else if (which == 1) {
-
                     MainActivity.mService.connectToDevice(mDevicesList.get(position));
 
-                    // send message
+                // send message
                 } else if (which == 2) {
                     replaceFragment(new ChatDirect(), mDevicesList.get(position).deviceName
+                            , mDevicesList.get(position).deviceAddress);
+
+                // send file
+                } else if (which == 3) {
+                    replaceFragment(new FileTransfer(), mDevicesList.get(position).deviceName
                             , mDevicesList.get(position).deviceAddress);
                 }
 

@@ -5,10 +5,15 @@
     <!-- permissions -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" android:required="true"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" android:required="true"/>
+
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" android:required="true"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" android:required="true"/>
+
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.INTERNET" android:required="true"/>
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
