@@ -125,6 +125,7 @@ public class FileTransfer extends Fragment {
     }
 
 
+    /** Ask for user permission READ_EXTERNAL_STORAGE. */
     private void askForStoragePermission() {
         if(ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if(ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
@@ -136,12 +137,14 @@ public class FileTransfer extends Fragment {
         }
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if(requestCode == 2) {
             Toast.makeText(getActivity(), "thx!", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     // Main Menu
     @Override
@@ -165,7 +168,7 @@ public class FileTransfer extends Fragment {
         super.onDestroyView();
         // unbind butterknife
         ButterKnife.unbind(this);
-
+        // stop file receiver
         if(MainActivity.mService != null) {
             MainActivity.mService.stopFileReceiver();
         }

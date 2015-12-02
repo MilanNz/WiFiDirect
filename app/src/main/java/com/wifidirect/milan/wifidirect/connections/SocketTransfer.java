@@ -268,6 +268,7 @@ public class SocketTransfer implements Transfer {
         @Override
         protected Void doInBackground(Void... params) {
             try {
+                Log.e(TAG, "Send file");
                 sendMessage(MessageUtils.createMessage("milan", "not important", MessageUtils.TYPE_FILE
                         , 22, MessageUtils.TYPE_IMAGE));
 
@@ -326,6 +327,7 @@ public class SocketTransfer implements Transfer {
 
     @Override
     public void startFileReceiver() {
+        Log.e(TAG, "start file receiver");
         mFileTask = new FileTask(mContext);
         mFileTask.execute();
     }
